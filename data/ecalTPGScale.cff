@@ -1,0 +1,7 @@
+
+    es_source tpparams12 = EmptyESSource {
+        string recordName = "EcalTPGPhysicsConstRcd"
+        vuint32 firstValid = { 1 }
+        bool iovIsRunNotTime = true
+    }
+
