@@ -16,7 +16,37 @@ process.eegeom = cms.ESSource("EmptyESSource",
 )
 
 # Get hardcoded conditions the same used for standard digitization
-process.load("CalibCalorimetry.EcalTrivialCondModules.EcalTrivialCondRetriever_cfi")
+##process.load("CalibCalorimetry.EcalTrivialCondModules.EcalTrivialCondRetriever_cfi")
+# or Get DB parameters 
+process.load('Configuration/StandardSequences/FrontierConditions_GlobalTag_cff')
+process.GlobalTag.globaltag = "IDEAL_31X::All"
+
+from CondCore.DBCommon.CondDBSetup_cfi import *
+CondDBSetup.DBParameters.authenticationPath = '/afs/cern.ch/cms/DB/conddb'
+process.ecalIntercalibConstants = cms.ESSource("PoolDBESSource",CondDBSetup,
+        connect = cms.string("oracle://cms_orcoff_prep/CMS_COND_31X_ALL"),
+        toGet = cms.VPSet( cms.PSet(
+                record = cms.string("EcalIntercalibConstantsRcd"),
+                tag = cms.string("EcalIntercalibConstants_avg1_ideal")
+                ) )
+)
+process.es_prefer_ecalIntercalibConstants = cms.ESPrefer("PoolDBESSource","ecalIntercalibConstants")
+
+#####CondDBSetup.DBParameters.authenticationPath = '/afs/cern.ch/cms/DB/conddb'
+#####process.ecalADCToGeV = cms.ESSource("PoolDBESSource",CondDBSetup,
+#####        connect = cms.string("oracle://cms_orcoff_prep/CMS_COND_31X_ALL"),
+#####        toGet = cms.VPSet( cms.PSet(
+#####                record = cms.string("EcalADCToGeVConstantRcd"),
+#####                tag = cms.string("EcalADCToGeVConstant_avg1_ideal")
+#####                ) )
+#####)
+#####process.es_prefer_ecalADCToGeV = cms.ESPrefer("PoolDBESSource","ecalADCToGeV")
+
+####process.load("CondCore.DBCommon.CondDBCommon_cfi")
+#####process.CondDBCommon.connect = 'sqlite_file:DB.db'
+####process.CondDBCommon.connect = 'oracle://cms_orcoff_prep/CMS_COND_31X_ALL'
+####process.CondDBCommon.DBParameters.authenticationPath = '/afs/cern.ch/cms/DB/conddb'
+
 
 #########################
 process.source = cms.Source("EmptySource")
@@ -38,14 +68,16 @@ process.TPGParamProducer = cms.EDFilter("EcalTPGParamBuilder",
 
     writeToFiles = cms.bool(True),
     outFile = cms.string('TPG.txt'),
-
+   #### TPG config tag and version (if not given it will be automatically given ) ####
+    TPGtag = cms.string('CRAFT'),
+    TPGversion = cms.uint32(1),
                                         
    #### TPG calculation parameters ####
     useTransverseEnergy = cms.bool(True),   ## true when TPG computes transverse energy, false for energy
     Et_sat_EB = cms.double(120.0),          ## Saturation value (in GeV) of the TPG before the compressed-LUT (rem: with 35.84 the TPG_LSB = crystal_LSB)
     Et_sat_EE = cms.double(120.0),          ## Saturation value (in GeV) of the TPG before the compressed-LUT (rem: with 35.84 the TPG_LSB = crystal_LSB)
 
-    sliding = cms.uint32(2),                ## Parameter used for the FE data format, should'nt be changed
+    sliding = cms.uint32(0),                ## Parameter used for the FE data format, should'nt be changed
 
     weight_sampleMax = cms.uint32(3),       ## position of the maximum among the 5 samples used by the TPG amplitude filter
 
